@@ -8,6 +8,8 @@ work on standard Windows systems, but process forks do not;
 
 import time, _thread as thread           # or use threading.Thread().start()
 from socket import *                     # get socket constructor and constants
+import struct
+import re
 myHost = ''                              # server machine, '' means local host
 myPort = 50007                           # listen on a non-reserved port number
 
@@ -15,12 +17,16 @@ sockobj = socket(AF_INET, SOCK_STREAM)           # make a TCP socket object
 sockobj.bind((myHost, myPort))                   # bind it to server port number
 sockobj.listen(5)                                # allow up to 5 pending connects
 
-def dispatcher():                                # listen until process killed
+def dispatcher(): 
+    
+    #creat wordlist from text document
+    wordlist = textfile_tolist("wordlist.txt")
+                                   # listen until process killed
     while True:                                  # wait for next connection,
         connection, address = sockobj.accept()   # pass to thread for service
         print('Server connected by', address, end=' ')
         print('at', now())
-        thread.start_new_thread(handleClient, (connection,))
+        thread.start_new_thread(handleClient, (connection,wordlist,))
 
 def handleClient(connection, wordlist):
     """
@@ -51,12 +57,13 @@ def handleClient(connection, wordlist):
             
             # convert matches to a string and send it as a reply
             matchlist_string = matchlist_to_string(matchlist)
-            print("Matches found! Replying with: {matchlist_string}")
+            print(f"Matches found! Replying with: {matchlist_string}")
             send_response(connection, len(matchlist_string), matchlist_string)
 
         except Exception as e:
             # if we get an exception, respond with error -3
             print("Exception detected! Replying with error code -3")
+            print(e)
             send_response(connection,-3)
 
     #close connection

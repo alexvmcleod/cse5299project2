@@ -33,11 +33,11 @@ def handleClient(connection, wordlist):
     while True:                                  # read, write a client socket
         # edited this line just to decode data
         request = connection.recv(1024).decode()
-        print(f"Recieved Request: {request}")
+        
         # try except block to catch any issues
         try:
             if not request: break
-
+            print(f"Recieved Request: {request}")
             # if we get an invalid input respond with a -1 header
             if not is_valid_request(request):
                 print("Invalid Input! Replying with error code -1")
@@ -53,7 +53,7 @@ def handleClient(connection, wordlist):
             
             # convert matches to a string and send it as a reply
             matchlist_string = matchlist_to_string(matchlist)
-            print("Matches found! Replying with: {matchlist_string}")
+            print(f"Matches found! Replying with: {matchlist_string}")
             send_response(connection, len(matchlist_string), matchlist_string)
 
         except Exception as e:
