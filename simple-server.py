@@ -1,26 +1,28 @@
-"""
-Server side: open a socket on a port, listen for a message from a client,
-and send an echo reply; echoes lines until eof when client closes socket;
-spawns a thread to handle each client connection; threads share global
-memory space with main thread; this is more portable than fork: threads
-work on standard Windows systems, but process forks do not;
-"""
-
 import time, _thread as thread           # or use threading.Thread().start()
 from socket import *                     # get socket constructor and constants
+import re
+import struct
+
 myHost = ''                              # server machine, '' means local host
 myPort = 50007                           # listen on a non-reserved port number
 
 sockobj = socket(AF_INET, SOCK_STREAM)           # make a TCP socket object
 sockobj.bind((myHost, myPort))                   # bind it to server port number
-sockobj.listen(5)                                # allow up to 5 pending connects
+sockobj.listen(5)  
 
-def dispatcher():                                # listen until process killed
+def dispatcher():
+    """
+    Main function that runs the loop
+    """
+    #creat wordlist from text document
+    wordlist = textfile_tolist("wordlist.txt")
+
+                                    # listen until process killed
     while True:                                  # wait for next connection,
         connection, address = sockobj.accept()   # pass to thread for service
         print('Server connected by', address, end=' ')
         print('at', now())
-        thread.start_new_thread(handleClient, (connection,))
+        handleClient(connection, wordlist)
 
 def handleClient(connection, wordlist):
     """
